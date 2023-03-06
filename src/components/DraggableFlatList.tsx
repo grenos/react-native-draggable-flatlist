@@ -6,12 +6,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ListRenderItem, FlatListProps, LayoutChangeEvent } from "react-native";
-import {
-  FlatList,
-  Gesture,
-  GestureDetector,
-} from "react-native-gesture-handler";
+import { LayoutChangeEvent } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedReaction,
@@ -34,21 +30,22 @@ import { useAutoScroll } from "../hooks/useAutoScroll";
 import { useStableCallback } from "../hooks/useStableCallback";
 import ScrollOffsetListener from "./ScrollOffsetListener";
 import { typedMemo } from "../utils";
+import { FlashList, FlashListProps, ListRenderItem } from "@shopify/flash-list";
 
 type RNGHFlatListProps<T> = Animated.AnimateProps<
-  FlatListProps<T> & {
-    ref: React.Ref<FlatList<T>>;
+  FlashListProps<T> & {
+    ref: React.Ref<FlashList<T>>;
     simultaneousHandlers?: React.Ref<any> | React.Ref<any>[];
   }
 >;
 
 type OnViewableItemsChangedCallback<T> = Exclude<
-  FlatListProps<T>["onViewableItemsChanged"],
+  FlashListProps<T>["onViewableItemsChanged"],
   undefined | null
 >;
 
 const AnimatedFlatList = (Animated.createAnimatedComponent(
-  FlatList
+  FlashList
 ) as unknown) as <T>(props: RNGHFlatListProps<T>) => React.ReactElement;
 
 function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
@@ -312,7 +309,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       // Turning this into a worklet causes timing issues. We want it to run
       // just after the finger lifts.
       runOnJS(onContainerTouchEnd)();
-    });
+    })
+    .runOnJS(true);
 
   if (dragHitSlop) panGesture.hitSlop(dragHitSlop);
   if (activationDistanceProp) {
@@ -388,6 +386,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
             scrollEventThrottle={16}
             simultaneousHandlers={props.simultaneousHandlers}
             removeClippedSubviews={false}
+            estimatedItemSize={props.estimatedItemSize}
           />
           {!!props.onScrollOffsetChange && (
             <ScrollOffsetListener
@@ -403,7 +402,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
 
 function DraggableFlatList<T>(
   props: DraggableFlatListProps<T>,
-  ref?: React.ForwardedRef<FlatList<T>> | null
+  ref?: React.ForwardedRef<FlashList<T>> | null
 ) {
   return (
     <PropsProvider {...props}>
@@ -421,5 +420,5 @@ const MemoizedInner = typedMemo(DraggableFlatListInner);
 // Generic forwarded ref type assertion taken from:
 // https://fettblog.eu/typescript-react-generic-forward-refs/#option-1%3A-type-assertion
 export default React.forwardRef(DraggableFlatList) as <T>(
-  props: DraggableFlatListProps<T> & { ref?: React.ForwardedRef<FlatList<T>> }
+  props: DraggableFlatListProps<T> & { ref?: React.ForwardedRef<FlashList<T>> }
 ) => ReturnType<typeof DraggableFlatList>;

@@ -5,6 +5,7 @@ import Animated, { WithSpringConfig } from "react-native-reanimated";
 import { DEFAULT_PROPS } from "../constants";
 import { useProps } from "./propsContext";
 import { CellData, DraggableFlatListProps } from "../types";
+import { FlashList } from "@shopify/flash-list";
 
 type RefContextValue<T> = {
   propsRef: React.MutableRefObject<DraggableFlatListProps<T>>;
@@ -12,7 +13,7 @@ type RefContextValue<T> = {
   cellDataRef: React.MutableRefObject<Map<string, CellData>>;
   keyToIndexRef: React.MutableRefObject<Map<string, number>>;
   containerRef: React.RefObject<Animated.View>;
-  flatlistRef: React.RefObject<FlatList<T>> | React.ForwardedRef<FlatList<T>>;
+  flatlistRef: React.RefObject<FlashList<T>> | React.ForwardedRef<FlashList<T>>;
   scrollViewRef: React.RefObject<Animated.ScrollView>;
 };
 const RefContext = React.createContext<RefContextValue<any> | undefined>(
@@ -24,7 +25,7 @@ export default function RefProvider<T>({
   flatListRef,
 }: {
   children: React.ReactNode;
-  flatListRef?: React.ForwardedRef<FlatList<T>> | null;
+  flatListRef?: React.ForwardedRef<FlashList<T>> | null;
 }) {
   const value = useSetupRefs<T>({ flatListRef });
   return <RefContext.Provider value={value}>{children}</RefContext.Provider>;
@@ -43,7 +44,7 @@ export function useRefs<T>() {
 function useSetupRefs<T>({
   flatListRef: flatListRefProp,
 }: {
-  flatListRef?: React.ForwardedRef<FlatList<T>> | null;
+  flatListRef?: React.ForwardedRef<FlashList<T>> | null;
 }) {
   const props = useProps<T>();
   const { animationConfig = DEFAULT_PROPS.animationConfig } = props;
@@ -60,7 +61,7 @@ function useSetupRefs<T>({
   const cellDataRef = useRef(new Map<string, CellData>());
   const keyToIndexRef = useRef(new Map<string, number>());
   const containerRef = useRef<Animated.View>(null);
-  const flatlistRefInternal = useRef<FlatList<T>>(null);
+  const flatlistRefInternal = useRef<FlashList<T>>(null);
   const flatlistRef = flatListRefProp || flatlistRefInternal;
   const scrollViewRef = useRef<Animated.ScrollView>(null);
 

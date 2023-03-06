@@ -10,21 +10,28 @@ import { useSafeNestableScrollContainerContext } from "../context/nestableScroll
 import { useNestedAutoScroll } from "../hooks/useNestedAutoScroll";
 import { typedMemo } from "../utils";
 import { useStableCallback } from "../hooks/useStableCallback";
-import { FlatList } from "react-native-gesture-handler";
+import { FlashList } from "@shopify/flash-list";
 
 function NestableDraggableFlatListInner<T>(
   props: DraggableFlatListProps<T>,
-  ref?: React.ForwardedRef<FlatList<T>>
+  ref?: React.ForwardedRef<FlashList<T>>
 ) {
   const hasSuppressedWarnings = useRef(false);
 
-  if (!hasSuppressedWarnings.current) {
-    LogBox.ignoreLogs([
-      "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing",
-    ]); // Ignore log notification by message
-    //@ts-ignore
-    console.reportErrorsAsExceptions = false;
-    hasSuppressedWarnings.current = true;
+  if (__DEV__) {
+    const ignoreWarns = [
+      "VirtualizedLists should never be nested inside plain ScrollViews",
+    ];
+
+    const errorWarn = global.console.error;
+    global.console.error = (...arg) => {
+      for (const error of ignoreWarns) {
+        if (arg[0].startsWith(error)) {
+          return;
+        }
+      }
+      errorWarn(...arg);
+    };
   }
 
   const {
@@ -45,6 +52,7 @@ function NestableDraggableFlatListInner<T>(
   useNestedAutoScroll({
     ...animVals,
     hoverOffset,
+    autoscrollThreshold: props.autoscrollThreshold,
   });
 
   const onListContainerLayout = useStableCallback(async ({ containerRef }) => {
@@ -105,5 +113,5 @@ function NestableDraggableFlatListInner<T>(
 export const NestableDraggableFlatList = React.forwardRef(
   NestableDraggableFlatListInner
 ) as <T>(
-  props: DraggableFlatListProps<T> & { ref?: React.ForwardedRef<FlatList<T>> }
+  props: DraggableFlatListProps<T> & { ref?: React.ForwardedRef<FlashList<T>> }
 ) => ReturnType<typeof NestableDraggableFlatListInner>;

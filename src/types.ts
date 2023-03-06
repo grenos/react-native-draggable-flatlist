@@ -12,6 +12,7 @@ import Animated, {
   WithSpringConfig,
 } from "react-native-reanimated";
 import { DEFAULT_PROPS } from "./constants";
+import { FlashListProps } from "@shopify/flash-list";
 
 export type DragEndParams<T> = {
   data: T[];
@@ -23,9 +24,10 @@ type Modify<T, R> = Omit<T, keyof R> & R;
 type DefaultProps = Readonly<typeof DEFAULT_PROPS>;
 
 export type DraggableFlatListProps<T> = Modify<
-  FlatListProps<T>,
+  FlashListProps<T>,
   {
     data: T[];
+    estimatedItemSize: number;
     activationDistance?: number;
     animationConfig?: Partial<WithSpringConfig>;
     autoscrollSpeed?: number;

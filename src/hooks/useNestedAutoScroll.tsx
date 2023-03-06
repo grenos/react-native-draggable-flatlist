@@ -52,7 +52,9 @@ export function useNestedAutoScroll(params: {
 
   const isScrolledDown = useDerivedValue(() => {
     return (
-      outerScrollOffset.value + containerSize.value + SCROLL_POSITION_TOLERANCE >=
+      outerScrollOffset.value +
+        containerSize.value +
+        SCROLL_POSITION_TOLERANCE >=
       scrollViewSize.value
     );
   }, []);
@@ -62,7 +64,8 @@ export function useNestedAutoScroll(params: {
   }, [hoverScreenOffset]);
 
   const distToBottomEdge = useDerivedValue(() => {
-    const dist = containerSize.value - (hoverScreenOffset.value + activeCellSize.value)
+    const dist =
+      containerSize.value - (hoverScreenOffset.value + activeCellSize.value);
     return Math.max(0, dist);
   }, [hoverScreenOffset, activeCellSize, containerSize]);
 
@@ -71,7 +74,7 @@ export function useNestedAutoScroll(params: {
   }, []);
 
   const isAtBottomEdge = useDerivedValue(() => {
-    return distToBottomEdge.value <= autoscrollThreshold;
+    return distToBottomEdge.value <= autoscrollThreshold / 2;
   });
 
   const scrollTarget = useSharedValue(0);
@@ -98,7 +101,9 @@ export function useNestedAutoScroll(params: {
     const bottomDisabled = isAtBottomEdge.value && isScrolledDown.value;
     const isEdgeDisabled = topDisabled || bottomDisabled;
 
-    const scrollTargetDiff = Math.abs(scrollTarget.value - outerScrollOffset.value);
+    const scrollTargetDiff = Math.abs(
+      scrollTarget.value - outerScrollOffset.value
+    );
     const scrollInProgress = scrollTargetDiff > SCROLL_POSITION_TOLERANCE;
 
     const shouldScroll =
